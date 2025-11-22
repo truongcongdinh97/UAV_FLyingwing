@@ -1,0 +1,39 @@
+FLYING WING UAV - V?t t? ph?n ?i?n / ?i?u khi?n,,,
+,Tên,Ghi chú,Giá
+I,H? th?ng ?i?u khi?n & D?n ???ng,,
+1,LANRC F4 V3S Plus Flight Controller,Trung tâm ?i?u khi?n (ch? huy trên không),"801,118 vn?"
+2,Beitian BN-220,Module ??nh v? GPS,"284,751 vn?"
+3,C?m bi?n la bàn ?i?n t? HMC5883,Module ??nh h??ng,"145,000 vn?"
+7,C?m bi?n kho?ng cách VL53L1X ,?áp / h? cánh,"259,000 vn?"
+4,,,
+II,H? th?ng Liên l?c,,
+1,Tay c?m Radiomaster Pocket,B? truy?n tín hi?u (Manual Control),"1,859,000 vn?"
+2,M?ch Thu  RX Radiomaster XR1 Nano ,B? nh?n tín hi?u,"469,000 vn?"
+,,,
+III,H? th?ng thu th?p/phân tích d? li?u (H?p ?en),,
+1,ESP32 - CAM,H?p ?en (có ch?c n?ng g?i GPS v? HTTP),Có s?n
+2,GY-9250,,Có s?n
+3,SD Card,,Có s?n
+4,Module 5G Hotspot (Modified) - Pin ??c l?p,Phát wifi - truy?n video - d? li?u v? tr?m m?t ??t,Có s?n
+6,HC-SR04,C?m Bi?n Siêu Âm HC-SR04,"50,000 vn?"
+,,,
+IV,Máy tính ??ng hành,,
+1,Raspberry Pi,Máy tính AI ??ng hành (t?ng t? l?nh trên không),Có s?n
+2,Camera OV5647 cho Raspberry Pi,,"105,000 vn?"
+V,H? th?ng ??ng l?c,,
+1,2x DXW D4250 800KV 3-7S Outrunner,??ng c? chính cho h? th?ng ??ng l?c kép,"1,021,936 vn?"
+2,2 x ESC (B? ?i?u t?c) 50A,B? ?i?u t?c ??ng c?,"690,000 vn?"
+3,2x ??ng C? RC Servo MG996R,?i?u khi?n ELEVON (Elevator + Aileron),"180,000 vn?"
+4,2x Cánh qu?t,T? thi?t k?,
+VI,H? th?ng ngu?n,,
+1,2x Lipo CNHL LVNCell 4s 5200mah 65C,Ngu?n chính C?u hình 4S2P - 10400mAh,"1,560,000 vn?"
+2,Hobbywing 3A UBEC,B? ?n áp ??c l?p cho servo,"138,000 vn?"
+3,Ngu?n Hp 12v 460w,Ngu?n s?c,"418,700 vn?"
+4,B? x? b? s?c cân b?ng Toolkitrc m7 200w 10a,B? s?c,"981,068 vn?"
+5,2x M?ch gi?m áp Buck DC-DC Mini-360 3A,Ngu?n cho ESP32 và Raspberry Pi,"15,000 vn?"
+VI,Khác,,
+1,V?t t? ph? (dây ?i?n / keo…),,
+2,Thanh carbon,,
+2,Nh?a in 3D (Lightweight) - ESUN ePLA-LW,Nh?a in tr?ng l??ng nh? - chuyên UAV (2 cu?n),"1,510,000 vn?"
+3,,,
+,,T?ng chi phí d? tính:,"9,267,755 vn?"

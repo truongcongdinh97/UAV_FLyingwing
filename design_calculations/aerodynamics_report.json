@@ -1,0 +1,47 @@
+{
+  "design_parameters": {
+    "target_flight_time_min": 27.5,
+    "target_speed_kmh": 65,
+    "target_payload_kg": 3.75,
+    "wing_area_m2": 0.162,
+    "wing_span_m": 0.9
+  },
+  "weight_analysis": {
+    "components_weight_kg": 2.355,
+    "payload_weight_kg": 3.75,
+    "total_weight_kg": 6.105,
+    "total_weight_g": 6105.0
+  },
+  "wing_loading": {
+    "wing_loading_n_m2": 369.6916666666667,
+    "wing_loading_kg_m2": 37.68518518518518,
+    "wing_area_m2": 0.162,
+    "total_weight_kg": 6.105
+  },
+  "stall_speed": {
+    "stall_speed_ms": 22.42725706390398,
+    "stall_speed_kmh": 80.73812543005432,
+    "safe_cruise_speed_ms": 29.155434183075176,
+    "safe_cruise_speed_kmh": 104.95956305907063
+  },
+  "thrust_to_weight": {
+    "estimated_thrust_n": 38.5,
+    "estimated_thrust_kgf": 3.9245667686034658,
+    "weight_n": 59.89005000000001,
+    "weight_kg": 6.105,
+    "thrust_to_weight_ratio": 0.6428446795419271,
+    "is_adequate": true
+  },
+  "flight_performance": {
+    "power_required_watts": 76.35006077697338,
+    "current_draw_amps": 5.158787890336039,
+    "battery_capacity_mah": 10400,
+    "usable_capacity_mah": 8320.0,
+    "flight_time_minutes": 96.76691707661634,
+    "flight_time_hours": 1.612781951276939,
+    "cruise_speed_kmh": 65,
+    "estimated_range_km": 104.83082683300104,
+    "meets_target": true
+  },
+  "lift_to_drag_ratio": 10.799573596919435
+}

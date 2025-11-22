@@ -1,0 +1,136 @@
+# Ground Control Station Configuration
+
+connection:
+  # Default connection parameters
+  default_ip: "192.168.1.100"
+  mavlink_port: 14550
+  video_port: 8554
+  connection_timeout: 5  # seconds
+  
+  # Retry settings
+  max_retries: 3
+  retry_delay: 2  # seconds
+  
+  # Heartbeat
+  heartbeat_interval: 1  # seconds
+  heartbeat_timeout: 5   # seconds
+
+display:
+  # UI update rates
+  telemetry_update_rate: 10  # Hz
+  video_update_rate: 30      # Hz
+  map_update_rate: 2         # Hz
+  
+  # Map settings
+  map_center: [21.028511, 105.804817]  # Hanoi default
+  map_zoom: 15
+  map_tile_server: "OpenStreetMap"  # or "Google", "Mapbox"
+  
+  # Video display
+  video_width: 640
+  video_height: 480
+  video_quality: 80  # 0-100
+
+telemetry:
+  # Data logging
+  log_enabled: true
+  log_path: "logs/telemetry"
+  log_format: "csv"  # or "json", "binary"
+  max_log_size: 100  # MB
+  
+  # Display units
+  altitude_unit: "m"     # or "ft"
+  speed_unit: "m/s"      # or "km/h", "mph", "knots"
+  distance_unit: "m"     # or "km", "mi"
+  temperature_unit: "C"  # or "F"
+
+video:
+  # Streaming settings
+  codec: "h264"
+  buffer_size: 2         # frames
+  latency: "low"         # "low", "medium", "high"
+  
+  # Recording
+  record_enabled: false
+  record_path: "recordings"
+  record_format: "mp4"
+
+alerts:
+  # Battery warnings
+  battery_warning: 30     # percent
+  battery_critical: 20    # percent
+  battery_failsafe: 15    # percent
+  
+  # Distance warnings
+  distance_warning: 500   # meters
+  distance_critical: 800  # meters
+  distance_max: 1000      # meters
+  
+  # Altitude warnings
+  altitude_min: 10        # meters
+  altitude_max: 150       # meters
+  
+  # GPS warnings
+  gps_min_satellites: 6
+  gps_min_hdop: 2.0
+  
+  # Link quality
+  link_quality_warning: 50   # percent
+  link_quality_critical: 20  # percent
+  
+  # Audio alerts
+  audio_enabled: true
+  voice_alerts: true
+
+mission:
+  # Mission planning
+  default_altitude: 50    # meters
+  default_speed: 15       # m/s
+  min_waypoint_distance: 10  # meters
+  
+  # Loiter settings
+  loiter_radius: 50       # meters
+  loiter_time: 60         # seconds
+  
+  # Geofence
+  geofence_enabled: true
+  geofence_radius: 500    # meters
+  geofence_altitude_min: 10   # meters
+  geofence_altitude_max: 150  # meters
+
+controls:
+  # Manual control sensitivity
+  pitch_sensitivity: 1.0
+  roll_sensitivity: 1.0
+  yaw_sensitivity: 1.0
+  throttle_sensitivity: 1.0
+  
+  # Safety limits
+  max_pitch_angle: 45     # degrees
+  max_roll_angle: 60      # degrees
+  max_climb_rate: 5       # m/s
+  max_descent_rate: 3     # m/s
+  
+  # Joystick (optional)
+  joystick_enabled: false
+  joystick_deadzone: 0.05
+
+ai:
+  # AI detection display
+  show_detections: true
+  confidence_threshold: 0.5
+  max_detections: 20
+  detection_timeout: 2  # seconds
+
+advanced:
+  # Developer options
+  debug_mode: false
+  log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  
+  # Performance
+  max_cpu_usage: 80  # percent
+  max_memory_usage: 500  # MB
+  
+  # Network
+  tcp_nodelay: true
+  tcp_keepalive: true

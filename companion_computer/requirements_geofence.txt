@@ -1,0 +1,47 @@
+# Geofencing System Requirements
+
+## Python Dependencies
+
+```
+shapely>=2.0.0      # Polygon geometry calculations
+folium>=0.14.0      # Interactive map visualization
+loguru>=0.7.0       # Logging
+pymavlink>=2.4.37   # MAVLink communication
+numpy>=1.24.0       # Numerical operations
+```
+
+## System Requirements
+
+- Raspberry Pi 3B+ or higher
+- Python 3.9+
+- Internet connection for map tiles (optional, can use cached)
+- Serial UART connection to flight controller
+
+## Optional Dependencies
+
+```
+# For advanced polygon operations
+geopandas>=0.14.0
+
+# For map tiles caching
+requests>=2.31.0
+pillow>=10.0.0
+```
+
+## Installation
+
+```bash
+# Basic installation
+pip install shapely folium loguru pymavlink numpy
+
+# Or install all companion computer dependencies
+cd companion_computer
+pip install -r requirements.txt
+```
+
+## Hardware Requirements
+
+- GPS module connected to iNav (required)
+- MAVLink serial connection RPi↔iNav
+- Minimum 8 satellites for reliable operation
+- GPS HDOP < 2.0 recommended

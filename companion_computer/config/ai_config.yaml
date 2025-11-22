@@ -1,0 +1,36 @@
+# AI Object Detection Configuration
+ai:
+  # Model settings
+  model_path: "models/mobilenet_ssd_v2.tflite"
+  labels_path: "models/coco_labels.txt"
+  
+  # Detection settings
+  confidence_threshold: 0.5  # 0.0 - 1.0
+  iou_threshold: 0.4  # Non-max suppression
+  
+  # Classes to detect (COCO dataset)
+  target_classes:
+    - "person"
+    - "car"
+    - "truck"
+    - "boat"
+    - "airplane"
+    # Add more as needed
+  
+  # Performance
+  input_size: [300, 300]  # Model input size
+  num_threads: 4  # CPU threads for inference
+  
+  # Edge TPU (if available)
+  use_edge_tpu: false
+  edge_tpu_delegate: "/usr/lib/aarch64-linux-gnu/libedgetpu.so.1"
+  
+  # Processing
+  process_every_n_frames: 2  # Process every N frames to save CPU
+  max_detections: 10  # Maximum detections per frame
+  
+  # Output
+  draw_boxes: true
+  draw_labels: true
+  box_color: [0, 255, 0]  # RGB
+  text_color: [255, 255, 255]
