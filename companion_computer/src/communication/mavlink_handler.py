@@ -27,13 +27,13 @@ class MAVLinkHandler:
     MSG_AI_DETECTION = 10002
     MSG_COMPANION_HEALTH = 10003
     
-    def __init__(self, port: str = '/dev/serial0', baudrate: int = 115200):
+    def __init__(self, port: str = '/dev/serial0', baudrate: int = 921600):
         """
         Khởi tạo MAVLink handler
         
         Args:
             port: Serial port
-            baudrate: Baudrate
+            baudrate: Baudrate (Default 921600 for ArduPilot)
         """
         self.port = port
         self.baudrate = baudrate
@@ -67,12 +67,16 @@ class MAVLinkHandler:
             
             self.master = mavutil.mavlink_connection(
                 self.port,
-                baud=self.baudrate
+                baud=self.baudrate,
+                source_system=255, # GCS/Companion ID
+                source_component=191 # MAV_COMP_ID_ONBOARD_COMPUTER
             )
             
             # Wait for heartbeat (timeout 5s)
-            logger.info("Waiting for heartbeat...")
-            self.master.wait_heartbeat(timeout=5)
+            logger.info("Waiting for heartbeat from ArduPilot...")
+            if not self.master.wait_heartbeat(timeout=5):
+                logger.error("No heartbeat received! Check if SITL/FC is running.")
+                return False
             
             self.is_connected = True
             logger.info(f"Connected to system {self.master.target_system}, component {self.master.target_component}")
@@ -165,6 +169,22 @@ class MAVLinkHandler:
                 'current': msg.current_battery / 100.0,
                 'remaining': msg.battery_remaining,
             }
+            
+        elif msg_type == 'COMMAND_ACK':
+            result_str = {
+                0: "ACCEPTED",
+                1: "TEMPORARILY_REJECTED",
+                2: "DENIED",
+                3: "UNSUPPORTED",
+                4: "FAILED",
+                5: "IN_PROGRESS",
+                6: "CANCELLED"
+            }.get(msg.result, f"UNKNOWN={msg.result}")
+            logger.info(f"Command ACK: {msg.command} -> {result_str}")
+            
+        elif msg_type == 'STATUSTEXT':
+            # Log messages from the Flight Controller (e.g. PreArm failures)
+            logger.info(f"FC Message: {msg.text}")
         
         # Call registered callbacks
         if msg_type in self.callbacks:
@@ -229,8 +249,11 @@ class MAVLinkHandler:
         Args:
             altitude: Target altitude (m)
         """
+        # Param 1: Minimum pitch (15 degrees)
+        # Param 7: Altitude
         return self.send_command(
             mavutil.mavlink.MAV_CMD_NAV_TAKEOFF,
+            param1=15,
             param7=altitude
         )
     

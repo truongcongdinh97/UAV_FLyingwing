@@ -18,8 +18,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # Import modules
 from camera import CameraInterface
-from ai import ObjectDetector
-from communication import SerialCommunication
+from ai import AdaptiveDetector
+from communication.mavlink_handler import MAVLinkHandler
 from data_logging import DataLogger
 
 
@@ -40,11 +40,15 @@ class CompanionComputer:
         # Load config
         self.config = self._load_config(config_path)
         
-        # Initialize modules
+                # Initialize modules
         self.camera = None
         self.detector = None
         self.comm = None
         self.data_logger = None
+        
+        # AI mode tracking
+        self.current_ai_mode = "reconnaissance"  # Default
+        self.ai_mode_changes = 0
         
         self.is_running = False
         self.frame_count = 0
@@ -86,17 +90,26 @@ class CompanionComputer:
                 else:
                     logger.info("✓ Camera ready")
             
-            # AI Detector
-            if auto_start.get('ai', True):
-                self.detector = ObjectDetector()
-                logger.info("✓ AI Detector ready")
+                        # AI Detector với RC mode switching
+            if auto_start.get('ai', True) and self.comm:
+                self.detector = AdaptiveDetector(self.comm)
+                logger.info("✓ Adaptive AI Detector with RC mode switching ready")
             
-            # Serial Communication
-            self.comm = SerialCommunication()
+            # MAVLink Communication (ArduPilot)
+            # Check for connection config (Simulation/TCP) or Serial config
+            conn_config = self.config.get('connection', {})
+            serial_config = self.config.get('system', {}).get('serial', {})
+            
+            port = conn_config.get('connection_string') or serial_config.get('port', '/dev/serial0')
+            baud = conn_config.get('baudrate') or serial_config.get('baudrate', 921600)
+            
+            logger.info(f"Initializing MAVLink on {port} at {baud}")
+            self.comm = MAVLinkHandler(port=port, baudrate=baud)
+            
             if self.comm.connect():
-                logger.info("✓ Serial communication ready")
+                logger.info("✓ MAVLink communication ready")
             else:
-                logger.warning("Serial communication failed (normal on test systems)")
+                logger.warning("MAVLink communication failed (normal on test systems)")
             
             logger.info("Setup completed")
             return True
@@ -145,39 +158,66 @@ class CompanionComputer:
         
         self.frame_count += 1
         
-        # AI Detection (mỗi N frames để save CPU)
-        process_interval = 2  # Process every 2 frames
-        if self.detector and (self.frame_count % process_interval == 0):
-            detections = self.detector.detect(frame)
+                # AI Detection với adaptive strategy
+        if self.detector:
+            detections = self.detector.process_frame(frame)
             
             if detections:
-                logger.debug(f"Detected {len(detections)} objects")
+                # Log mode changes
+                detector_status = self.detector.get_status()
+                current_mode = detector_status.get('current_mode', 'unknown')
                 
-                # Log detections
+                if current_mode != self.current_ai_mode:
+                    self.current_ai_mode = current_mode
+                    self.ai_mode_changes += 1
+                    logger.info(f"AI Mode: {current_mode.upper()} (Change #{self.ai_mode_changes})")
+                
+                # Log detections với mode context
                 if self.data_logger:
-                    self.data_logger.log_detection(detections)
+                    self.data_logger.log_detection(detections, {
+                        'ai_mode': current_mode,
+                        'detection_frequency': detector_status.get('detection_frequency'),
+                        'is_tracking': detector_status.get('is_tracking', False)
+                    })
                 
                 # Draw boxes (if needed for streaming/recording)
-                # frame = self.detector.draw_detections(frame, detections)
+                # frame = self.detector.detector.draw_detections(frame, detections)
         
-        # Read telemetry from FC
+        # Read telemetry from FC (Non-blocking)
         if self.comm and self.comm.is_connected:
-            telemetry = self.comm.read_telemetry()
+            # Get latest data from handler
+            gps = self.comm.get_gps()
+            attitude = self.comm.get_attitude()
+            battery = self.comm.get_battery()
             
-            if telemetry and self.data_logger:
-                self.data_logger.log_telemetry(telemetry)
+            if self.data_logger:
+                # Log telemetry if available
+                telemetry = {}
+                if gps: telemetry.update(gps)
+                if attitude: telemetry.update(attitude)
+                if battery: telemetry.update(battery)
                 
-                # Extract GPS if available
-                if 'lat' in telemetry and 'lon' in telemetry:
+                if telemetry:
+                    self.data_logger.log_telemetry(telemetry)
+                
+                # Log GPS specifically
+                if gps and 'lat' in gps and 'lon' in gps:
                     self.data_logger.log_gps(
-                        telemetry['lat'],
-                        telemetry['lon'],
-                        telemetry.get('alt', 0)
+                        gps['lat'],
+                        gps['lon'],
+                        gps.get('alt', 0)
                     )
         
-        # Log frame info periodically
+                # Log system status periodically
         if self.frame_count % 300 == 0:  # Every 300 frames (~10s at 30fps)
-            logger.info(f"Processed {self.frame_count} frames")
+            status_info = f"Processed {self.frame_count} frames"
+            
+            if self.detector:
+                detector_status = self.detector.get_status()
+                status_info += f", AI Mode: {detector_status.get('current_mode', 'unknown')}"
+                status_info += f", Tracking: {detector_status.get('is_tracking', False)}"
+            
+            logger.info(status_info)
     
     def shutdown(self):
         """Shutdown tất cả modules"""
