@@ -55,7 +55,7 @@ class AerodynamicsCalculator:
             'voltage_min': 13.2,  # V (4S cutoff)
             'capacity': 10400,  # mAh (2x 5200mAh)
             'discharge_rate': 65,  # C rating
-            'weight': 0.800,  # kg (estimate for 2x 5200mAh 4S)
+            'weight': 1.000,  # kg (estimate for 2x 5200mAh 4S)
         }
         
         # Khối lượng các component (từ BOM)
@@ -76,15 +76,15 @@ class AerodynamicsCalculator:
             'ultrasonic': 0.015,  # HC-SR04
             'raspberry_pi': 0.045,  # Raspberry Pi 3B+
             'camera_ov5647': 0.003,  # Pi Camera
-            'motors': 0.180,  # 2x D4250 (~90g each)
+            'motors': 0.380,  # 2x D4250 (~190g each)
             'esc': 0.100,  # 2x ESC 50A (~50g each)
             'servos': 0.110,  # 2x MG996R (~55g each)
             'propellers': 0.040,  # 2x props (estimate)
-            'battery': 0.800,  # 2x 5200mAh 4S
+            'battery': 1.00,  # 2x 5200mAh 4S
             'ubec': 0.020,  # Hobbywing 3A UBEC
             'buck_converters': 0.010,  # 2x Mini-360
             'wiring': 0.100,  # Dây điện, connectors
-            'frame_3d_printed': 0.600,  # Khung máy bay in 3D (estimate)
+            'frame_3d_printed': 1.00,  # Khung máy bay in 3D (estimate)
             'carbon_rods': 0.150,  # Thanh carbon
             'glue_fasteners': 0.050,  # Keo, vít
         }

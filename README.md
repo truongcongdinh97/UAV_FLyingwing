@@ -5,12 +5,16 @@
 Phát triển một chiếc UAV cánh bay (Flying Wing) sử dụng động cơ kép (Twin-Engine). Phục vụ các công việc trinh sát tự hành, lập bản đồ và xử lý AI ngay trên thiết bị (Edge Computing).
 
 ### 1. Thông Số Kỹ Thuật
-*   **Thời gian bay**: Khoảng 25-30 phút.
+*   **Cấu hình khí động học**: Modified Blended Wing Body (BWB) with Vertical Stabilizers (Thân cánh liền khối cải tiến tích hợp cánh ổn định dọc).
+*   **Kiểu dáng**: Lấy cảm hứng từ Horten Ho 229.
+*   **Profile cánh (Airfoil)**: NACA 4412.
+*   **Sải cánh**: 2200mm (2.2m).
+*   **Thời gian bay**: Khoảng 60-90 phút (với pin 6S2P).
 *   **Tải trọng**: 3.5-4.0 kg.
 *   **Tốc độ hành trình**: 50-80 km/h.
-*   **Động lực**: Cấu hình 2 động cơ D4250 800KV, sử dụng lực đẩy vi sai (differential thrust) để điều hướng.
-*   **Pin**: Pack Li-ion 4S2P 10400mAh tự đóng.
-*   **Flight Controller (FC)**: LANRC F4 V3S Plus (Chip STM32F405).
+*   **Động lực**: Cấu hình 2 động cơ D4250 600KV, sử dụng lực đẩy vi sai (differential thrust) để điều hướng.
+*   **Pin**: Pack Li-ion 6S2P 10400mAh tự đóng.
+*   **Flight Controller (FC)**: LANRC F4 V3S Plus (Chip STM32F405) chạy ArduPilot (ArduPlane).
 *   **Companion Computer**: Raspberry Pi 3B+.
 
 ### 2. Tính Năng Nổi Bật
@@ -26,10 +30,10 @@ Phát triển một chiếc UAV cánh bay (Flying Wing) sử dụng động cơ 
 ## II. Kiến Trúc Hệ Thống
 
 ### 1. Flight Controller (Firmware)
-Mình dùng iNav 8.0.1 và custom lại code. FC chịu trách nhiệm giữ cân bằng, trộn tín hiệu động cơ (mixing) và dẫn đường cơ bản.
+Mình đã chuyển sang dùng **ArduPilot (ArduPlane)** thay vì iNav để hỗ trợ tốt hơn cho MAVLink và Twin Engine.
 *   **Phần cứng**: LANRC F4 V3S Plus.
-*   **Custom**: Mình viết lại bộ mixer để hỗ trợ differential thrust cho cánh bay.
-*   **Failsafe**: Tự động RTH khi mất tín hiệu.
+*   **Tính năng**: Hỗ trợ native Differential Thrust, Geofence 3D, Terrain Following.
+*   **Failsafe**: Tự động RTL (Return to Launch) khi mất tín hiệu hoặc pin yếu.
 
 ### 2. Companion Computer (Raspberry Pi)
 Đây là "bộ não" xử lý các tác vụ cao cấp.
@@ -46,24 +50,19 @@ Giao diện web để mình ngồi dưới đất giám sát.
 
 ---
 
-## III. Phần Firmware (iNav Custom)
+## III. Phần Firmware (ArduPilot)
 
-Can thiệp sâu vào code của iNav để tùy chỉnh.
+Sử dụng ArduPlane firmware cho khả năng bay tự hành chuyên nghiệp.
 
-### 1. Môi Trường Build
-firmware được build trên Linux (dùng WSL2 Ubuntu 22.04 trên Windows) với bộ compiler ARM GCC.
-*   **Toolchain**: gcc-arm-none-eabi
-*   **Build System**: CMake/Ninja
+### 1. Cấu hình Twin Engine
+*   **Differential Thrust**: Sử dụng tính năng có sẵn của ArduPilot.
+    *   `SERVO1_FUNCTION` = 73 (ThrottleLeft)
+    *   `SERVO2_FUNCTION` = 74 (ThrottleRight)
+    *   `RUDD_DT_GAIN` = 10-50 (Độ nhạy lái hướng)
 
-### 2. Custom Mixer
-Vì cánh bay này không có đuôi đứng (rudder), phải dùng chênh lệch lực đẩy 2 động cơ để xoay mũi.
-*   **Nguyên lý**: Ga (Throttle) tăng cả 2 motor. Hướng (Yaw) sẽ làm một bên quay nhanh hơn, bên kia chậm lại.
-*   **Code**: Nằm trong file `src/main/flight/mixer_custom_twin.c`.
-
-### 3. Cách Cài Đặt
-a.  **Build**: Chạy mấy script trong thư mục `firmware/scripts`.
-b.  **Flash**: Dùng iNav Configurator nạp file `.hex` vào mạch `MATEKF405`.
-c.  **Config**: Copy lệnh trong `firmware/config/inav_cli_config.txt` paste vào CLI để setup cổng với mixer.
+### 2. Kết nối Companion
+*   Cổng UART (TELEM1/2) cấu hình MAVLink 2.
+*   Baudrate: 921600.
 
 ---
 
@@ -155,11 +154,12 @@ Hệ thống dùng kết hợp 2 loại giao thức.
 
 ## VIII. Hướng Dẫn Cài Đặt
 
-### 1. Setup Firmware
-1.  Cài WSL2 Ubuntu 22.04 trên Windows.
-2.  Chạy script cài toolchain ARM.
-3.  Build ra file hex cho `MATEKF405`.
-4.  Cắm cáp USB, dùng iNav Configurator flash vào mạch.
+### 1. Setup Firmware (ArduPilot)
+1.  Tải và cài đặt **Mission Planner**.
+2.  Kết nối mạch F4 qua USB.
+3.  Vào Setup -> Install Firmware -> Chọn **ArduPlane**.
+4.  Flash firmware mới nhất cho mạch (MatekF405-SE hoặc tương đương).
+5.  Vào Config/Tuning -> Full Parameter List để setup các tham số `SERVO_FUNCTION`.
 
 ### 2. Setup Raspberry Pi
 1.  Cài Raspberry Pi OS Lite vào thẻ nhớ.
@@ -197,13 +197,158 @@ Hệ thống dùng kết hợp 2 loại giao thức.
 
 ## X. Tình Trạng Dự Án
 
-cập nhật 22/11/2025.
+cập nhật 26/11/2025.
 
-*   **Firmware**: Đã build xong, mixer chạy ok
+*   **Thiết kế**: Đã chốt phương án sải cánh 2.2m, profile NACA 4412, kiểu dáng Horten Ho 229.
+*   **Firmware**: Đã chuyển sang ArduPilot, sẵn sàng flash.
 *   **Dẫn đường**: Đã test thuật toán bám đường và bay vòng tròn - lệch.
-*   **AI**: chưa nhận diện được vật thể.
+*   **AI**: Đã có module nhận diện, đang test với video giả lập.
 *   **An toàn**: Geofence và Failsafe pin / ok.
 *   **Kết nối**: Web Server /ok.
 *   **Lập lịch**: Đã test/ ok.
+*   **Quantum Filtering**: Đã tích hợp Quantum-inspired Kalman Filter với Variational Quantum Circuits.
+
+---
+
+## XI. Quantum-inspired Kalman Filter
+
+### 🎯 Mục Tiêu Nghiên Cứu
+
+Module này triển khai **Quantum-inspired Kalman Filter (QKF)** sử dụng **Variational Quantum Circuits (VQC)** cho việc lọc nhiễu phi tuyến tính của cảm biến MEMS rẻ tiền trong ứng dụng UAV.
+
+**Câu hỏi nghiên cứu chính:**
+- Thuật toán lượng tử có thể cải thiện lọc nhiễu cho cảm biến MEMS giá rẻ không?
+- Bộ lọc dựa trên VQC so sánh thế nào với EKF cổ điển trong môi trường edge computing?
+- Giới hạn thực tế của thuật toán lượng tử trên phần cứng hạn chế tài nguyên?
+
+### 🧠 Phương Pháp Kỹ Thuật
+
+#### 1. Kiến Trúc Variational Quantum Circuit
+- **Qubits**: Hệ thống 4-qubit đại diện cho không gian trạng thái
+- **Layers**: 3 lớp biến phân với các phép quay được tham số hóa
+- **Entanglement**: Kết nối tuyến tính cho mô phỏng hiệu quả
+- **Observable**: Đo lường Pauli-Z cho ước lượng trạng thái
+
+#### 2. Hoạt Động Shadow Mode
+- **So sánh thời gian thực**: QKF chạy song song với EKF tiêu chuẩn của ArduPilot
+- **Không can thiệp**: Không ảnh hưởng đến hệ thống điều khiển bay
+- **Thu thập dữ liệu**: Các chỉ số hiệu suất toàn diện
+- **Fallback**: Tự động chuyển sang Kalman cổ điển nếu lượng tử thất bại
+
+#### 3. Mô Hình Nhiễu MEMS
+- **Nhiễu Gaussian**: Nhiễu cảm biến tiêu chuẩn
+- **Bias Drift**: Độ lệch phi tuyến thay đổi theo thời gian
+- **Cross-coupling**: Hiệu ứng giao thoa cảm biến
+- **Ảnh hưởng nhiệt độ**: Mô phỏng drift nhiệt
+
+### 📊 Chỉ Số Hiệu Suất
+
+#### Chỉ Số Chính
+- **Độ chính xác ước lượng trạng thái**: RMSE so với ground truth
+- **Giảm nhiễu**: Cải thiện tỷ lệ tín hiệu-nhiễu
+- **Thời gian xử lý**: So sánh lượng tử vs cổ điển
+- **Điểm tin cậy**: Chỉ số độ tin cậy của bộ lọc
+
+#### Chỉ Số Phụ
+- **Sử dụng tài nguyên**: CPU, bộ nhớ, tiêu thụ điện năng
+- **Hành vi hội tụ**: Độ ổn định tối ưu hóa lượng tử
+- **Độ bền**: Hiệu suất trong các điều kiện nhiễu khác nhau
+
+### 🛠️ Chi Tiết Triển Khai
+
+#### Thành Phần Chính
+
+##### 1. Lớp QuantumKalmanFilter
+```python
+class QuantumKalmanFilter:
+    def predict(self, dt: float) -> np.ndarray
+    def update_quantum(self, measurement: np.ndarray, dt: float) -> np.ndarray
+    def update_classical(self, measurement: np.ndarray, dt: float) -> np.ndarray
+```
+
+##### 2. Lớp VariationalQuantumCircuit
+```python
+class VariationalQuantumCircuit:
+    def build_circuit(self, initial_state: np.ndarray) -> QuantumCircuit
+    def run_vqe(self, observable: SparsePauliOp, initial_point: np.ndarray) -> float
+```
+
+##### 3. Lớp ShadowModeComparator
+```python
+class ShadowModeComparator:
+    def process_comparison(self, sensor_data, ekf_state, ekf_confidence, ekf_time)
+    def generate_performance_report(self) -> Dict
+```
+
+### 🔬 Thiết Lập Thí Nghiệm
+
+#### Môi Trường Phần Cứng
+- **Companion Computer**: Raspberry Pi 3B+
+- **Flight Controller**: LANRC F4 V3S Plus
+- **Cảm biến**: MPU6050 (IMU), HMC5883L (Magnetometer)
+- **Giao tiếp**: UART cho MAVLink, 5G cho truyền dữ liệu
+
+#### Stack Phần Mềm
+- **Quantum Framework**: Qiskit Aer (simulator)
+- **Baseline cổ điển**: Standard Kalman Filter
+- **Xử lý dữ liệu**: NumPy, SciPy
+- **Trực quan hóa**: Matplotlib (cho phân tích)
+
+### 📈 Kết Quả Mong Đợi
+
+#### Đóng Góp Kỹ Thuật
+1. **Phương pháp lọc mới**: Ứng dụng đầu tiên của VQC cho sensor fusion MEMS trong UAV
+2. **Benchmark hiệu suất**: So sánh định lượng với phương pháp cổ điển
+3. **Phân tích tài nguyên**: Giới hạn thực tế của thuật toán lượng tử trên thiết bị biên
+4. **Đặc trưng nhiễu**: Hiểu biết về lợi thế lượng tử cho các loại nhiễu cụ thể
+
+#### Ý Nghĩa Thực Tiễn
+- **Cải thiện ước lượng trạng thái**: Ước lượng attitude và position tốt hơn
+- **Giảm chi phí**: Tiềm năng sử dụng cảm biến rẻ hơn với bộ lọc lượng tử
+- **Nền tảng nghiên cứu**: Cơ sở cho các hệ thống navigation tăng cường lượng tử trong tương lai
+
+### 🚀 Sử Dụng
+
+#### Tích Hợp Cơ Bản
+```python
+from src.quantum.quantum_integration import QuantumFilteringIntegration
+
+# Khởi tạo quantum filtering
+quantum_integration = QuantumFilteringIntegration()
+
+# Thêm dữ liệu cảm biến (shadow mode)
+quantum_integration.add_imu_data(sensor_readings)
+quantum_integration.add_ekf_data(ekf_state, confidence, processing_time)
+
+# Bắt đầu xử lý
+quantum_integration.start_shadow_mode()
+```
+
+#### Giám Sát Hiệu Suất
+```python
+# Lấy so sánh mới nhất
+comparison = quantum_integration.get_latest_comparison()
+
+# Tạo báo cáo hiệu suất
+report = quantum_integration.comparator.generate_performance_report()
+```
+
+### ⚠️ Giới Hạn & Hướng Phát Triển
+
+#### Giới Hạn Hiện Tại
+- **Chỉ mô phỏng**: Không có truy cập phần cứng lượng tử thật
+- **Chi phí tính toán**: Overhead đáng kể trên Raspberry Pi
+- **Độ sâu mạch**: Bị giới hạn bởi khả năng mô phỏng cổ điển
+- **Mô hình nhiễu**: Đơn giản hóa so với điều kiện thực tế
+
+#### Hướng Phát Triển
+- **Tăng tốc phần cứng**: Triển khai FPGA cho VQC
+- **Thuật toán hybrid**: Các phương pháp lai cổ điển-lượng tử
+- **Phần cứng lượng tử thật**: Triển khai trên cloud quantum computers
+- **Mô hình nhiễu nâng cao**: Mô hình hóa lỗi cảm biến thực tế hơn
+
+---
+
+**Lưu ý**: Đây là module nghiên cứu tập trung vào khám phá lợi thế lượng tử trong sensor fusion, không phải code sẵn sàng cho sản xuất cho flight control.
 
 

@@ -1,0 +1,11 @@
+# Windows Development Dependencies
+numpy
+PyYAML
+opencv-python
+pyserial
+pymavlink
+requests
+loguru
+schedule
+shapely
+# tensorflow  # Optional/Problematic on Windows Python 3.13

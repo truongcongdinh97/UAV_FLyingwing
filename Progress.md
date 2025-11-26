@@ -1,10 +1,15 @@
 # Project Progress Report
 
-**Date**: November 22, 2025
+**Date**: November 26, 2025
 **Status**: Software Development Complete / Ready for Hardware Integration
 
 ## I. Executive Summary
 The Flying Wing UAV project has reached the software completion milestone. All modules specified in the project portfolio have been implemented, tested in simulation/mock environments, and documented. The system features a custom flight controller firmware, a sophisticated companion computer application for edge AI and autonomy, and a comprehensive ground control station.
+
+**Recent Updates**:
+- ✅ Updated BOM list with correct specifications (Motor 600KV + Battery 6S2P)
+- ✅ Updated aerodynamics calculations for 6S configuration
+- ✅ All code modules synchronized with latest hardware specifications
 
 ## II. Module Implementation Status
 
@@ -34,6 +39,13 @@ The Flying Wing UAV project has reached the software completion milestone. All m
     *   Real-time Dashboard (Map, Video, Telemetry).
     *   Mission Planning Interface.
 
+### 4. Design Calculations
+*   **Status**: 100% Complete
+*   **Updates**:
+    *   Aerodynamics calculator updated for 6S2P battery configuration
+    *   Motor specifications corrected to 600KV
+    *   Weight analysis synchronized with BOM
+
 ## III. Portfolio Requirements Compliance
 
 | Requirement | Implementation | Status |
@@ -52,7 +64,25 @@ The Flying Wing UAV project has reached the software completion milestone. All m
 | **Mapping** | GPS-synced Capture | ✅ |
 | **Scheduled Missions** | `mission_scheduler.py` | ✅ |
 
-## IV. Directory Structure
+## IV. Hardware Specifications (Updated)
+
+### Power System
+- **Motors**: 2x DXW D4250 600KV Outrunner
+- **Battery**: 6S2P 10400mAh LiPo (22.2V nominal)
+- **ESC**: 2x 100A Electronic Speed Controllers
+- **Servos**: 2x MG996R for elevon control
+
+### Control System
+- **Flight Controller**: LANRC F4 V3S Plus
+- **GPS**: Beitian BN-220
+- **Companion Computer**: Raspberry Pi 3B+
+- **Cameras**: OV5647 (Pi Camera) + ESP32-CAM
+
+### Communication
+- **RC**: Radiomaster Pocket + XR1 Nano Receiver
+- **Data Link**: 5G Hotspot for video/telemetry
+
+## V. Directory Structure
 
 ```
 Flying_Wing_UAV/

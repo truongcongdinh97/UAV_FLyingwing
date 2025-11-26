@@ -15,8 +15,12 @@ try:
     import tflite_runtime.interpreter as tflite
     TFLITE_AVAILABLE = True
 except ImportError:
-    logger.warning("TFLite runtime not available")
-    TFLITE_AVAILABLE = False
+    try:
+        import tensorflow.lite as tflite
+        TFLITE_AVAILABLE = True
+    except ImportError:
+        logger.warning("TFLite runtime not available")
+        TFLITE_AVAILABLE = False
 
 
 class Detection:
@@ -51,6 +55,13 @@ class ObjectDetector:
         Args:
             config_path: Đường dẫn đến file config
         """
+        # Resolve absolute paths
+        self.base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+        # Resolve config path
+        if not os.path.isabs(config_path):
+            config_path = os.path.join(self.base_dir, config_path)
+
         self.config = self._load_config(config_path)
         self.interpreter = None
         self.input_details = None
@@ -87,9 +98,15 @@ class ObjectDetector:
             'num_threads': 4,
         }
     
+    def _resolve_path(self, path: str) -> str:
+        """Resolve absolute path relative to project root"""
+        if os.path.isabs(path):
+            return path
+        return os.path.join(self.base_dir, path)
+
     def _load_model(self):
         """Load TFLite model"""
-        model_path = self.config['model_path']
+        model_path = self._resolve_path(self.config['model_path'])
         
         if not os.path.exists(model_path):
             logger.error(f"Model not found: {model_path}")
@@ -115,7 +132,7 @@ class ObjectDetector:
     
     def _load_labels(self):
         """Load class labels"""
-        labels_path = self.config['labels_path']
+        labels_path = self._resolve_path(self.config['labels_path'])
         
         if not os.path.exists(labels_path):
             logger.warning(f"Labels not found: {labels_path}")
@@ -165,86 +182,65 @@ class ObjectDetector:
     def detect(self, image: np.ndarray) -> List[Detection]:
         """
         Detect objects trong image
-        
         Args:
             image: Input image (BGR format)
-            
         Returns:
             List of Detection objects
         """
         if not self.is_initialized:
             return []
-        
         try:
             # Preprocess
             input_tensor = self.preprocess_image(image)
-            
             # Run inference
             self.interpreter.set_tensor(
                 self.input_details[0]['index'], 
                 input_tensor
             )
             self.interpreter.invoke()
-            
             # Get outputs
-            # Giả định model output format: [boxes, classes, scores, num_detections]
             boxes = self.interpreter.get_tensor(self.output_details[0]['index'])[0]
             classes = self.interpreter.get_tensor(self.output_details[1]['index'])[0]
             scores = self.interpreter.get_tensor(self.output_details[2]['index'])[0]
-            
+            num = int(self.interpreter.get_tensor(self.output_details[3]['index'])[0])
             # Parse detections
             detections = self._parse_detections(
-                boxes, classes, scores, image.shape
+                boxes, classes, scores, image.shape, num
             )
-            
             return detections
-            
         except Exception as e:
             logger.error(f"Detection error: {e}")
             return []
     
     def _parse_detections(self, boxes: np.ndarray, classes: np.ndarray,
-                         scores: np.ndarray, image_shape: Tuple) -> List[Detection]:
+                         scores: np.ndarray, image_shape: Tuple, num: int) -> List[Detection]:
         """Parse model outputs thành Detection objects"""
         detections = []
         confidence_threshold = self.config['confidence_threshold']
         target_classes = self.config.get('target_classes', None)
-        
         height, width = image_shape[:2]
-        
-        for i, score in enumerate(scores):
+        for i in range(num):
+            score = scores[i]
             if score < confidence_threshold:
                 continue
-            
-            # Get class
             class_id = int(classes[i])
             if class_id >= len(self.labels):
                 continue
-            
             class_name = self.labels[class_id]
-            
-            # Filter target classes if specified
             if target_classes and class_name not in target_classes:
                 continue
-            
-            # Get bbox (normalized coordinates: ymin, xmin, ymax, xmax)
             ymin, xmin, ymax, xmax = boxes[i]
-            
-            # Convert to pixel coordinates
             x1 = int(xmin * width)
             y1 = int(ymin * height)
             x2 = int(xmax * width)
             y2 = int(ymax * height)
-            
             detection = Detection(
                 bbox=(x1, y1, x2, y2),
                 class_id=class_id,
                 class_name=class_name,
                 confidence=float(score)
             )
-            
             detections.append(detection)
-        
         return detections
     
     def draw_detections(self, image: np.ndarray, 

@@ -38,6 +38,25 @@ class CameraInterface:
     
     def _load_config(self, config_path: str) -> dict:
         """Load configuration từ YAML"""
+        # Check system config first for override
+        # Try multiple locations for system_config.yaml
+        possible_paths = [
+            "config/system_config.yaml",
+            "companion_computer/config/system_config.yaml",
+            os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "config/system_config.yaml")
+        ]
+        
+        for sys_path in possible_paths:
+            if os.path.exists(sys_path):
+                try:
+                    with open(sys_path, 'r') as f:
+                        sys_conf = yaml.safe_load(f)
+                        if sys_conf and 'camera' in sys_conf:
+                            logger.info(f"Loaded camera config from {sys_path}")
+                            return sys_conf['camera']
+                except Exception as e:
+                    logger.warning(f"Error loading config from {sys_path}: {e}")
+
         if os.path.exists(config_path):
             with open(config_path, 'r') as f:
                 config = yaml.safe_load(f)
@@ -54,6 +73,8 @@ class CameraInterface:
             'flip_horizontal': False,
             'flip_vertical': False,
             'rotation': 0,
+            'source': 'auto', # auto, picamera, opencv, mock, ip_webcam
+            'ip_url': 'http://192.168.1.169:8080/video' # Default for IP Webcam
         }
     
     def start(self) -> bool:
@@ -67,8 +88,15 @@ class CameraInterface:
             logger.warning("Camera already running")
             return True
         
+        source = self.config.get('source', 'auto')
+        logger.info(f"Starting camera with source: {source}")
+
         try:
-            if PICAMERA_AVAILABLE:
+            if source == 'mock':
+                self._start_mock_camera()
+            elif source == 'ip_webcam':
+                self._start_ip_webcam()
+            elif source == 'picamera' or (source == 'auto' and PICAMERA_AVAILABLE):
                 self._start_picamera()
             else:
                 self._start_opencv_camera()
@@ -80,7 +108,26 @@ class CameraInterface:
         except Exception as e:
             logger.error(f"Failed to start camera: {e}")
             return False
-    
+
+    def _start_mock_camera(self):
+        """Start mock camera for simulation"""
+        self.camera = "MOCK"
+        logger.info("Mock camera started (simulation mode)")
+
+    def _start_ip_webcam(self):
+        """Start IP Webcam stream (Android)"""
+        url = self.config.get('ip_url', 'http://192.168.1.169:8080/video')
+        logger.info(f"Connecting to IP Webcam at {url}...")
+        self.camera = cv2.VideoCapture(url)
+        
+        # Optimize for low latency
+        self.camera.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        
+        if not self.camera.isOpened():
+            raise Exception(f"Could not open video stream from {url}")
+            
+        logger.info("IP Webcam connected")
+
     def _start_picamera(self):
         """Khởi động Pi Camera với picamera2"""
         self.camera = Picamera2()
@@ -123,7 +170,24 @@ class CameraInterface:
             return None
         
         try:
-            if PICAMERA_AVAILABLE and isinstance(self.camera, Picamera2):
+            if self.camera == "MOCK":
+                # Generate mock frame (noise or black)
+                width = self.config.get('width', 640)
+                height = self.config.get('height', 480)
+                # Create a dummy frame with some moving noise to simulate video
+                frame = np.zeros((height, width, 3), dtype=np.uint8)
+                # Add some random noise
+                noise = np.random.randint(0, 256, (height, width, 3), dtype=np.uint8)
+                frame = cv2.addWeighted(frame, 0.7, noise, 0.3, 0)
+                # Add frame count text
+                cv2.putText(frame, f"MOCK CAMERA {self.frame_count}", (50, 50), 
+                           cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+                
+                # Simulate FPS delay
+                import time
+                time.sleep(1.0 / self.config.get('fps', 30))
+                
+            elif PICAMERA_AVAILABLE and isinstance(self.camera, Picamera2):
                 # picamera2 returns RGB
                 frame = self.camera.capture_array()
                 # Convert RGB to BGR for OpenCV compatibility
@@ -132,11 +196,15 @@ class CameraInterface:
                 # OpenCV camera
                 ret, frame = self.camera.read()
                 if not ret:
-                    logger.error("Failed to read frame")
+                    # If opencv fails (e.g. end of video file), loop or return None
+                    # For now, just log error once per second to avoid spam
+                    if self.frame_count % 30 == 0:
+                        logger.error("Failed to read frame from OpenCV source")
                     return None
             
             # Apply transformations
-            frame = self._apply_transformations(frame)
+            if self.camera != "MOCK":
+                frame = self._apply_transformations(frame)
             
             self.frame_count += 1
             return frame

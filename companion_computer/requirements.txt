@@ -1,15 +1,15 @@
 # Python Dependencies for Raspberry Pi Companion Computer
 
 # Core
-numpy>=1.21.0
+numpy
 PyYAML>=6.0
 
 # Computer Vision
 opencv-python>=4.5.0
-picamera2>=0.3.0  # Pi Camera V2 interface
+# picamera2>=0.3.0  # Pi Camera V2 interface (Use system package: sudo apt install python3-libcamera)
 
 # AI/ML
-tflite-runtime>=2.11.0  # TensorFlow Lite for edge inference
+# tflite-runtime>=2.11.0  # Handled by install_pi.sh script
 # Alternative: tensorflow>=2.11.0  # Full TF if needed
 
 # Serial Communication
@@ -37,3 +37,12 @@ shapely>=2.0.0
 
 # Map visualization (optional for tools)
 folium>=0.14.0
+
+# Quantum Computing (Optional - for quantum-inspired filtering)
+# qiskit>=0.44.0  # Full Qiskit - requires significant resources
+qiskit-aer>=0.12.0  # Aer simulator only - lighter weight
+qiskit-algorithms>=0.2.0
+
+# Alternative lightweight quantum libraries
+# pennylane>=0.32.0  # Cross-platform quantum machine learning
+# tensorflow-quantum>=0.7.0  # If using TensorFlow backend
