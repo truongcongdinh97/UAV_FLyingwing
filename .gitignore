@@ -66,3 +66,48 @@ firmware/**/.pio/
 *.png
 data_logs/
 flight_recordings/
+
+# Sensitive files - DO NOT COMMIT
+WLP pass.txt
+*pass*.txt
+*password*.txt
+*secret*.txt
+*key*.txt
+*credential*.txt
+*.key
+*.pem
+.env
+.env.local
+
+# Temporary and backup files
+*.bak
+*.tmp
+*.temp
+*~
+
+# Log files - should not be committed
+logs/
+companion_computer/logs/
+ground_station/logs/
+
+# System files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE and editor files
+.idea/
+*.swp
+*.swo
+
+# Large model files (should use git-lfs if needed)
+*.tflite
+*.h5
+*.pth
+*.pkl
+
+# Test and simulation output
+simulation/output/
+design_calculations/*.png
+design_calculations/*.json
+

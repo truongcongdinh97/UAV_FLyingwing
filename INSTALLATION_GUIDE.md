@@ -1,4 +1,11 @@
-# 🚀 Flying Wing UAV - Hướng Dẫn Cài Đặt
+# Quay lại main branch
+git checkout main
+
+# Xóa branch rc-mode-switching (tùy chọn)
+git branch -D rc-mode-switching
+
+# Kiểm tra đang ở main branch
+git branch# 🚀 Flying Wing UAV - Hướng Dẫn Cài Đặt
 
 ## 📋 Tổng Quan
 
