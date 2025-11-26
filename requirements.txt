@@ -1,84 +1,99 @@
-# Flying Wing UAV - Companion Computer Requirements
-# Raspberry Pi 3B+ - Edge Computing & Autonomous Flight
+# Flying Wing UAV - Raspberry Pi 3B+ Optimized Requirements
+# Tối ưu hóa cho hiệu suất và tương thích với RPi 3B+
 
 # =============================================================================
-# CORE DEPENDENCIES - BẮT BUỘC
+# CORE - BẮT BUỘC CHO HOẠT ĐỘNG CƠ BẢN
 # =============================================================================
 
-# System & Utilities
-numpy>=1.21.0              # Numerical computing - CORE cho AI processing
-opencv-python>=4.5.0       # Computer vision - Camera, image processing
-Pillow>=8.0.0              # Image processing
-pyyaml>=6.0                # Configuration files
-loguru>=0.6.0              # Structured logging - Better debugging
+# Numerical & Image Processing
+numpy==1.21.6              # Version ổn định cho RPi, tránh memory issues
+opencv-python==4.5.5.64    # Version nhẹ, tương thích tốt với RPi 3B+
+Pillow==9.5.0              # Image processing
+pyyaml==6.0                # Configuration
+
+# Logging & Utilities
+loguru==0.7.2              # Structured logging - tiêu thụ ít CPU
 
 # MAVLink Communication
-pymavlink>=2.4.0           # MAVLink protocol - Giao tiếp với Flight Controller
+pymavlink==2.4.37          # MAVLink protocol - giao tiếp với ArduPilot
 
-# AI & Machine Learning
-tensorflow>=2.11.0         # TensorFlow core (CPU version cho RPi)
-tflite-runtime>=2.11.0     # TensorFlow Lite runtime - Lightweight inference
-
-# Quantum Computing (Optional - Research)
-qiskit>=0.44.0             # Quantum computing framework
-qiskit-aer>=0.12.0         # Quantum simulator
-qiskit-machine-learning>=0.6.0  # Quantum machine learning
+# AI Inference - QUAN TRỌNG: Dùng TensorFlow Lite thay vì TensorFlow full
+# TensorFlow Lite runtime nhẹ hơn 10x so với TensorFlow full
+tflite-runtime==2.13.0     # TensorFlow Lite - CHỈ CẦN CHO INFERENCE
 
 # =============================================================================
-# RASPBERRY PI SPECIFIC - CHO HARDWARE INTEGRATION
+# RASPBERRY PI HARDWARE - CHO CAMERA VÀ GPIO
 # =============================================================================
 
-# Camera Interface
-picamera2>=0.3.0           # Raspberry Pi Camera interface - QUAN TRỌNG
+# Camera Interface - BẮT BUỘC cho Pi Camera
+picamera2==0.3.7           # Raspberry Pi Camera interface
 
-# GPIO & Hardware
-RPi.GPIO>=0.7.0            # GPIO control
-smbus2>=0.4.0              # I2C communication
+# GPIO & I2C
+RPi.GPIO==0.7.1            # GPIO control
+smbus2==0.4.3              # I2C communication
 
 # =============================================================================
-# OPTIONAL DEPENDENCIES - CHO DEVELOPMENT & TESTING
+# OPTIONAL - CHO PHÁT TRIỂN VÀ NGHIÊN CỨU
 # =============================================================================
+
+# Quantum Computing Research (CÓ THỂ BỎ QUA nếu không dùng)
+qiskit==0.44.1             # Quantum computing
+qiskit-aer==0.12.2         # Quantum simulator
 
 # Testing & Development
-pytest>=7.0.0              # Testing framework
-pytest-cov>=4.0.0          # Test coverage
-matplotlib>=3.5.0          # Plotting & visualization
-jupyter>=1.0.0             # Jupyter notebooks
-
-# Web Interface (Optional)
-flask>=2.0.0               # Web framework cho ground station
-flask-socketio>=5.0.0      # Real-time WebSocket communication
-
-# Data Analysis
-pandas>=1.5.0              # Data analysis
-scipy>=1.9.0               # Scientific computing
+pytest==7.4.3              # Testing
+matplotlib==3.7.2          # Plotting (có thể nặng cho RPi)
 
 # =============================================================================
-# PERFORMANCE OPTIMIZATIONS - CHO RASPBERRY PI 3B+
+# INSTALLATION GUIDE CHO RASPBERRY PI 3B+
 # =============================================================================
 
-# Lightweight alternatives cho resource-constrained environments
-# pip install --no-deps tensorflow-cpu  # Thay thế tensorflow full nếu cần
+# Bước 1: Cập nhật hệ thống
+# sudo apt update && sudo apt upgrade -y
+
+# Bước 2: Cài đặt Python dependencies từ system packages
+# sudo apt install python3-pip python3-venv python3-opencv python3-numpy
+
+# Bước 3: Tạo virtual environment
+# python3 -m venv uav_env
+# source uav_env/bin/activate
+
+# Bước 4: Cài đặt requirements
+# pip install -r requirements_rpi_optimized.txt
+
+# Bước 5: Cài đặt TensorFlow Lite runtime (nếu có vấn đề)
+# pip install https://github.com/google-coral/pycoral/releases/download/v2.0.0/tflite_runtime-2.5.0-cp39-cp39-linux_armv7l.whl
 
 # =============================================================================
-# INSTALLATION NOTES
+# TROUBLESHOOTING
 # =============================================================================
 
-# Cài đặt trên Raspberry Pi:
-# pip install -r requirements.txt
+# Nếu gặp lỗi memory trên RPi 3B+:
+# 1. Tăng swap space: sudo dphys-swapfile swapoff && sudo dphys-swapfile set 2048 && sudo dphys-swapfile setup && sudo dphys-swapfile swapon
+# 2. Sử dụng zram: sudo apt install zram-config
 
-# Hoặc cài từng phần (nếu gặp vấn đề dependency):
-# pip install numpy opencv-python Pillow pyyaml loguru
-# pip install pymavlink picamera2 RPi.GPIO
-# pip install tensorflow tflite-runtime
+# Nếu gặp lỗi với OpenCV:
+# pip install opencv-python-headless==4.5.5.64  # Version nhẹ hơn
 
-# Đối với TensorFlow trên RPi 3B+, có thể cần build từ source hoặc dùng pre-built wheels
-# Tham khảo: https://www.tensorflow.org/lite/guide/python
+# Nếu gặp lỗi với TensorFlow Lite:
+# Thử cài đặt từ pre-built wheel cho armv7l
 
 # =============================================================================
-# VERSION COMPATIBILITY
+# PERFORMANCE TIPS
 # =============================================================================
 
-# Python: 3.9+ (khuyến nghị 3.9 hoặc 3.10 cho RPi 3B+)
-# OS: Raspberry Pi OS (64-bit) khuyến nghị
-# Architecture: armv7l (RPi 3B+)
+# Giảm resolution camera: 640x480 thay vì 1080p
+# Sử dụng detection interval: detect mỗi 5-15 frames
+# Tắt unnecessary services: sudo systemctl disable bluetooth
+# Overclock nhẹ: arm_freq=1300, over_voltage=2 trong /boot/config.txt
+
+# =============================================================================
+# MEMORY USAGE ESTIMATES
+# =============================================================================
+
+# OpenCV: ~50MB
+# NumPy: ~30MB  
+# TensorFlow Lite: ~20MB
+# MAVLink: ~10MB
+# Application: ~100MB
+# TOTAL: ~210MB - Phù hợp với RPi 3B+ (1GB RAM)
