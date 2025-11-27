@@ -44,12 +44,14 @@ class HTTPUploadClient:
         self.telemetry_queue = Queue(maxsize=max_queue_size)
         self.image_queue = Queue(maxsize=max_queue_size)
         self.detection_queue = Queue(maxsize=max_queue_size)
+        self.target_queue = Queue(maxsize=max_queue_size)
         
         # Worker threads
         self.is_running = False
         self.telemetry_worker = None
         self.image_worker = None
         self.detection_worker = None
+        self.target_worker = None
         
         # Statistics
         self.stats = {
@@ -87,10 +89,15 @@ class HTTPUploadClient:
             target=self._detection_upload_worker,
             daemon=True
         )
+        self.target_worker = threading.Thread(
+            target=self._target_upload_worker,
+            daemon=True
+        )
         
         self.telemetry_worker.start()
         self.image_worker.start()
         self.detection_worker.start()
+        self.target_worker.start()
         
         logger.success("📡 HTTP Upload Client STARTED")
         return True
@@ -105,6 +112,8 @@ class HTTPUploadClient:
             self.image_worker.join(timeout=2)
         if self.detection_worker:
             self.detection_worker.join(timeout=2)
+        if self.target_worker:
+            self.target_worker.join(timeout=2)
         
         logger.info("📡 HTTP Upload Client STOPPED")
     
@@ -143,6 +152,22 @@ class HTTPUploadClient:
             
         except Exception as e:
             logger.warning(f"Failed to queue detection: {e}")
+    
+    def queue_target_geolocation(self, target: Dict):
+        """
+        Queue vị trí mục tiêu để upload lên ground station
+        Args:
+            target: dict {'lat': ..., 'lon': ..., 'confidence': ..., 'timestamp': ...}
+        Giải thích:
+            - Đây là pipeline chuẩn: Sau khi tính toán vị trí mục tiêu, gọi hàm này để gửi lên server.
+            - Dữ liệu sẽ được POST tới /api/target trên ground station.
+        """
+        try:
+            target['timestamp'] = datetime.now().isoformat()
+            self.target_queue.put_nowait(target)
+            logger.debug(f"Queued target geolocation (queue size: {self.target_queue.qsize()})")
+        except Exception as e:
+            logger.warning(f"Failed to queue target geolocation: {e}")
     
     def _telemetry_upload_worker(self):
         """Background worker for telemetry upload"""
@@ -200,6 +225,27 @@ class HTTPUploadClient:
                     self.stats['upload_errors'] += 1
                 
             except Exception as e:
+                pass
+    
+    def _target_upload_worker(self):
+        """
+        Background worker for target geolocation upload
+        Giải thích:
+            - Lấy dữ liệu từ queue, gửi POST /api/target lên ground station.
+        """
+        while self.is_running:
+            try:
+                target = self.target_queue.get(timeout=1.0)
+                
+                # Upload
+                success = self._upload_target_geolocation(target)
+                
+                if success:
+                    logger.debug("Target geolocation uploaded successfully")
+                else:
+                    logger.warning("Target geolocation upload failed")
+            
+            except Exception:
                 pass
     
     def _upload_telemetry(self, telemetry: Dict) -> bool:
@@ -303,6 +349,38 @@ class HTTPUploadClient:
             logger.error(f"Detection upload error: {e}")
             return False
     
+    def _upload_target_geolocation(self, target: Dict) -> bool:
+        """
+        Upload vị trí mục tiêu lên server (POST /api/target)
+        Args:
+            target: dict {'lat': ..., 'lon': ..., ...}
+        Returns:
+            True nếu thành công, False nếu lỗi
+        """
+        try:
+            url = f"{self.server_url}/api/target"
+            
+            headers = {}
+            if self.api_key:
+                headers['Authorization'] = f'Bearer {self.api_key}'
+            
+            response = requests.post(
+                url,
+                json=target,
+                headers=headers,
+                timeout=5.0
+            )
+            
+            if response.status_code == 200:
+                return True
+            else:
+                logger.warning(f"Target geolocation upload failed: {response.status_code}")
+                return False
+            
+        except Exception as e:
+            logger.error(f"Target geolocation upload error: {e}")
+            return False
+    
     def send_command_request(self, command: str, params: Dict = None) -> Optional[Dict]:
         """Request command execution from ground station"""
         try:
@@ -382,6 +460,15 @@ if __name__ == "__main__":
         "gps": {"lat": 21.028511, "lon": 105.804817}
     }
     client.queue_detection(detection)
+    
+    # Test target geolocation upload
+    print("Queueing test target geolocation...")
+    target = {
+        "lat": 21.028511,
+        "lon": 105.804817,
+        "confidence": 0.95
+    }
+    client.queue_target_geolocation(target)
     
     # Status
     time.sleep(2)

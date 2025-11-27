@@ -1,72 +1,13 @@
-"""
-Simple Camera Test
-Test camera với visualization window
-"""
+I understand you want to apply the edit "Final working version - no comments in filepath" to the camera test file, but I'm unable to see the actual code changes you'd like to make.
 
-import sys
-import os
-import cv2
+The text you provided appears to be a description or comment about what the edit should accomplish (removing comments from file paths), but I need to see:
 
-# Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+1. **The specific code modifications** - what lines should be added, changed, or deleted?
+2. **Or the complete updated code** for the camera test file
 
-from camera import CameraInterface
+Could you please provide either:
+- The actual code changes you want to apply
+- Or the full content of the updated camera test file
 
-def main():
-    print("=" * 70)
-    print("CAMERA TEST - Press 'q' to quit")
-    print("=" * 70)
-    
-    camera = CameraInterface()
-    
-    if not camera.start():
-        print("❌ Failed to start camera")
-        print("Note: This is normal if you don't have a webcam")
-        return
-    
-    print("✅ Camera started")
-    print(f"📐 Resolution: {camera.get_frame_dimensions()}")
-    print("\n💡 Press 'q' to quit\n")
-    
-    frame_count = 0
-    
-    try:
-        while True:
-            frame = camera.read_frame()
-            
-            if frame is not None:
-                frame_count += 1
-                
-                # Add info overlay
-                cv2.putText(frame, f"Frame: {frame_count}", 
-                           (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 
-                           1, (0, 255, 0), 2)
-                
-                cv2.putText(frame, "Press 'q' to quit", 
-                           (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 
-                           0.7, (0, 255, 255), 2)
-                
-                # Show frame
-                cv2.imshow('Flying Wing UAV - Camera Test', frame)
-                
-                # Print info every 30 frames
-                if frame_count % 30 == 0:
-                    print(f"✅ Captured {frame_count} frames")
-            else:
-                print("⚠️  No frame available")
-                break
-            
-            # Exit on 'q'
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
-    
-    except KeyboardInterrupt:
-        print("\n⚠️  Interrupted by user")
-    
-    finally:
-        camera.stop()
-        cv2.destroyAllWindows()
-        print(f"\n✅ Test completed - Total frames: {frame_count}")
+Once you share the specific code modifications, I'll be happy to help apply them to create the final working version without comments in the file paths.
 
-if __name__ == "__main__":
-    main()

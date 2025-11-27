@@ -10,6 +10,7 @@ import time
 import numpy as np
 from typing import List, Optional, Dict
 from loguru import logger
+from collections import deque
 
 from .object_detector import ObjectDetector, Detection
 from .rc_mode_controller import RCModeController, AIMissionMode, DetectionFrequency
@@ -38,9 +39,9 @@ class AdaptiveDetector:
         self.tracked_objects: List[Detection] = []
         self.frame_count = 0
         
-        # Performance monitoring
-        self.detection_times = []
-        self.tracking_times = []
+        # Performance monitoring (giới hạn bộ nhớ, tránh memory leak)
+        self.detection_times = deque(maxlen=1000)
+        self.tracking_times = deque(maxlen=1000)
         
         # Current configuration
         self.current_config = self.mode_controller.get_current_config()

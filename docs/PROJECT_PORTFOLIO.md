@@ -38,7 +38,7 @@ Thiết kế dạng module cho phép thay đổi cấu hình tùy theo mục đ�
 
 ---
 
-## 🔬 NGHIÊN CỨU MỚI: QUANTUM-INSPIRED KALMAN FILTER
+## NGHIÊN CỨU MỚI: QUANTUM-INSPIRED KALMAN FILTER
 
 ### Mục Tiêu Nghiên Cứu
 1. **Triển khai thuật toán lượng tử cảm hứng** trên Raspberry Pi để lọc nhiễu phi tuyến tính của cảm biến MEMS giá rẻ
@@ -94,9 +94,9 @@ companion_computer/src/quantum/
 
 ---
 
-## 🚀 TÍNH NĂNG HỆ THỐNG ĐÃ HOÀN THÀNH
+## TÍNH NĂNG HỆ THỐNG ĐÃ HOÀN THÀNH
 
-### ✅ Software Modules (100% Complete)
+### Software Modules (100% Complete)
 - **Companion Computer**: Raspberry Pi application với module hóa
 - **MAVLink Communication**: Giao tiếp đầy đủ với ArduPilot
 - **AI Object Detection**: TensorFlow Lite trên edge
@@ -106,13 +106,13 @@ companion_computer/src/quantum/
 - **Quantum Filtering**: Research module hoàn chỉnh
 - **IMU Drift Correction**: Quantum Kalman Filter cho GPS loss scenarios
 
-### ✅ Design Calculations
+### Design Calculations
 - **Aerodynamics Analysis**: Tính toán khí động học chi tiết
 - **CG Calculation**: Phân tích trọng tâm
 - **Performance Prediction**: Ước tính thời gian bay, tốc độ
 - **6S Power System**: Tối ưu hóa cho motor 600KV
 
-### ✅ Testing & Simulation
+### Testing & Simulation
 - **SITL Integration**: ArduPilot simulation testing
 - **Controller Testing**: RadioMaster Pocket validation
 - **AI Testing**: Object detection với synthetic data
@@ -120,22 +120,22 @@ companion_computer/src/quantum/
 
 ---
 
-## 📊 TRẠNG THÁI DỰ ÁN
+## TRẠNG THÁI DỰ ÁN
 
 **Cập nhật**: 26/11/2025
 
-### 🟢 ĐÃ HOÀN THÀNH
+### ĐÃ HOÀN THÀNH
 - Toàn bộ software development và testing
 - Hardware specification finalization
 - Quantum research module integration
 - Documentation và deployment scripts
 
-### 🟡 ĐANG THỰC HIỆN
+### ĐANG THỰC HIỆN
 - Hardware integration và bench testing
 - Field testing preparation
 - Performance optimization
 
-### 🔴 KẾ HOẠCH
+### KẾ HOẠCH
 - Flight testing với quantum filtering
 - Research data collection và analysis
 - Publication preparation

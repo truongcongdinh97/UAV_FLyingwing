@@ -47,6 +47,7 @@ for folder in [IMAGE_FOLDER, TELEMETRY_FOLDER, DETECTION_FOLDER]:
 # In-memory storage for latest data
 latest_telemetry = {}
 latest_detections = []
+latest_target = None  # Lưu vị trí mục tiêu mới nhất
 connected_clients = set()
 
 # API key for authentication (optional)
@@ -287,6 +288,43 @@ def get_detection_history():
     
     except Exception as e:
         logger.error(f"Error getting detection history: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/target', methods=['POST'])
+def receive_target():
+    """
+    Nhận dữ liệu vị trí mục tiêu từ máy tính đồng hành (Companion Computer)
+    Pipeline chuẩn: Sau khi UAV tính toán vị trí mục tiêu, gửi POST /api/target lên server.
+    - Lưu file target
+    - Broadcast WebSocket cho dashboard
+    - Cập nhật biến latest_target
+    """
+    if not verify_api_key():
+        return jsonify({'error': 'Unauthorized'}), 401
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+        # Lưu vị trí mục tiêu mới nhất
+        global latest_target
+        latest_target = data
+        # Lưu file
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        target_folder = UPLOAD_FOLDER / "targets"
+        target_folder.mkdir(parents=True, exist_ok=True)
+        filename = target_folder / f"target_{timestamp}.json"
+        with open(filename, 'w') as f:
+            json.dump(data, f, indent=2)
+        # Broadcast WebSocket cho dashboard
+        socketio.emit('target_update', data, broadcast=True)
+        logger.info(f"Received target geolocation: lat={data.get('lat')}, lon={data.get('lon')}")
+        return jsonify({
+            'status': 'success',
+            'message': 'Target geolocation received'
+        })
+    except Exception as e:
+        logger.error(f"Error receiving target geolocation: {e}")
         return jsonify({'error': str(e)}), 500
 
 

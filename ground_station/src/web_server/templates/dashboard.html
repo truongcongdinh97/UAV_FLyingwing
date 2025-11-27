@@ -32,7 +32,7 @@
         
         .header h1 {
             font-size: 24px;
-            color: #0f3460;
+            color: #FFFFFF;
             text-shadow: 0 0 10px #00d4ff;
         }
         
@@ -286,7 +286,15 @@
                 iconAnchor: [12, 41]
             })
         }).addTo(map);
-        
+
+        // Target marker (mục tiêu)
+        let targetMarker = null;
+        const targetIcon = L.icon({
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png', // icon mục tiêu
+            iconSize: [32, 32],
+            iconAnchor: [16, 32]
+        });
+
         // Path polyline
         let pathCoords = [];
         let pathLine = L.polyline(pathCoords, {color: 'red', weight: 2}).addTo(map);
@@ -333,6 +341,22 @@
                 pathLine.setLatLngs(pathCoords);
                 
                 // Center map on UAV
+                map.setView(pos);
+            }
+        });
+        
+        // Handle target geolocation updates
+        socket.on('target_update', (data) => {
+            console.log('Target geolocation:', data);
+            if (data.lat && data.lon) {
+                const pos = [data.lat, data.lon];
+                // Nếu đã có marker thì cập nhật vị trí, nếu chưa thì tạo mới
+                if (targetMarker) {
+                    targetMarker.setLatLng(pos);
+                } else {
+                    targetMarker = L.marker(pos, {icon: targetIcon}).addTo(map);
+                }
+                // Center map on target
                 map.setView(pos);
             }
         });

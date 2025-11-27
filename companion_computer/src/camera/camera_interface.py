@@ -281,23 +281,16 @@ def main():
     try:
         while True:
             frame = camera.read_frame()
-            
             if frame is not None:
-                # Display frame info
                 cv2.putText(frame, f"Frame: {camera.frame_count}", 
                            (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 
                            1, (0, 255, 0), 2)
-                
-                # Show frame
+                # Chỉ hiển thị khi chạy test trực tiếp
                 cv2.imshow('Camera Test', frame)
-            
-            # Exit on 'q'
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
-    
     except KeyboardInterrupt:
         print("\nInterrupted by user")
-    
     finally:
         camera.stop()
         cv2.destroyAllWindows()

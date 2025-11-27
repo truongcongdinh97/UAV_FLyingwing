@@ -34,6 +34,7 @@ class DataLogger:
         self.telemetry_log = None
         self.gps_log = None
         self.events_log = None
+        self.target_log = None
         
         logger.info(f"Data logger initialized - Session: {self.session_id}")
     
@@ -83,6 +84,9 @@ class DataLogger:
         
         events_file = os.path.join(self.session_dir, "events.jsonl")
         self.events_log = open(events_file, 'a')
+        
+        target_file = os.path.join(self.session_dir, "target.jsonl")
+        self.target_log = open(target_file, 'a')
         
         logger.info(f"Logging to: {self.session_dir}")
     
@@ -201,6 +205,33 @@ class DataLogger:
         except Exception as e:
             logger.error(f"Failed to log detection: {e}")
     
+    def log_target_geolocation(self, target: Dict[str, Any]):
+        """
+        Ghi log vị trí địa lý mục tiêu vào file target.jsonl
+        
+        Args:
+            target: dict {'lat': ..., 'lon': ..., 'confidence': ..., 'timestamp': ...}
+        
+        Giải thích:
+            - Đây là pipeline chuẩn: Sau khi tính toán và gửi vị trí mục tiêu, cần ghi log lại để kiểm tra, audit, phân tích sau nhiệm vụ.
+            - Log này giúp xác thực hệ thống tracking hoạt động đúng, không bị mất dữ liệu mục tiêu.
+        """
+        if self.target_log is None:
+            return
+        
+        try:
+            if 'timestamp' not in target:
+                target['timestamp'] = time.time()
+            
+            json_line = json.dumps(target) + '\n'
+            self.target_log.write(json_line)
+            self.target_log.flush()
+            
+            logger.info(f"Logged target geolocation: {target}")
+        
+        except Exception as e:
+            logger.error(f"Failed to log target geolocation: {e}")
+    
     def get_session_dir(self) -> Optional[str]:
         """Lấy đường dẫn session directory"""
         return self.session_dir
@@ -218,6 +249,10 @@ class DataLogger:
         if self.events_log:
             self.events_log.close()
             self.events_log = None
+        
+        if self.target_log:
+            self.target_log.close()
+            self.target_log = None
         
         logger.info("Data logger closed")
     
