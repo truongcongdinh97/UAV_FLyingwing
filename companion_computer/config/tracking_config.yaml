@@ -1,0 +1,62 @@
+# Tracking Configuration - Optimized for 20-25m altitude
+# Updated for OpenCV 4.12.0 - New tracker API
+# Priority: VIT/MIL trackers with optimized CPU usage
+
+tracking:
+  # Altitude-based strategy settings
+  altitude_ranges:
+    optimal: [20, 25]      # Meters - Use VIT for best accuracy
+    good: [15, 30]         # Meters - Use MIL when needed for balance
+    acceptable: [10, 35]   # Meters - Use MIL for CPU saving
+  
+  # Tracker selection priority (OpenCV 4.12.0 compatible)
+  # VIT: Vision Transformer - Best accuracy, recommended
+  # MIL: Multiple Instance Learning - Stable fallback, no model needed
+  tracker_priority:
+    - "vit"         # Highest priority - Vision Transformer, best performance
+    - "mil"         # Fallback - Robust, good accuracy, no model needed
+  
+  # Model paths for deep learning trackers
+  model_paths:
+    vit: "models/trackers/object_tracking_vittrack_2023sep.onnx"
+  
+  # CPU optimization settings
+  cpu_optimization:
+    frame_skip_interval: 2      # Skip every 2nd frame
+    enable_frame_skipping: true
+    max_cpu_usage: 80           # Percentage
+    
+  # Performance thresholds
+  performance:
+    max_tracking_failures: 5
+    min_bbox_size: [20, 20]     # Minimum width, height
+    max_bbox_aspect_ratio: 5.0  # Maximum width/height ratio
+    min_bbox_aspect_ratio: 0.2  # Minimum width/height ratio
+    
+  # Altitude change sensitivity
+  altitude_sensitivity:
+    significant_change: 5.0      # Meters - Log altitude changes
+    reinitialize_threshold: 10.0 # Meters - Reinitialize tracker
+    
+  # Logging settings
+  logging:
+    level: "INFO"
+    track_performance: true
+    log_altitude_changes: true
+
+# Camera settings for tracking
+camera:
+  resolution:
+    width: 640
+    height: 480
+  framerate: 30
+  flip_horizontal: false
+  flip_vertical: false
+  rotation: 0
+  
+# Real-time monitoring
+monitoring:
+  update_interval: 1.0     # Seconds between status updates
+  performance_stats: true
+  altitude_quality: true
+  tracker_type: true

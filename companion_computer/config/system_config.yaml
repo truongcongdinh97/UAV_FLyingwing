@@ -1,0 +1,74 @@
+# System Configuration
+system:
+  name: "FlyingWing_UAV_Companion"
+  version: "1.0.0"
+  
+  # Modes
+  mode: "autonomous"  # Initial flight mode: autonomous, manual, test
+  debug: true
+  
+  # Connection (Uncomment for Simulation/SITL)
+  connection:
+    connection_string: "udpin:0.0.0.0:14551"
+    baudrate: 57600
+
+  # Serial Communication with Flight Controller (ArduPilot)
+  serial:
+    port: "/dev/serial0"  # RPi UART (Primary)
+    baudrate: 921600      # Recommended for ArduPilot Telemetry
+    timeout: 1.0
+    protocol: "mavlink"  # mavlink 2.0
+  
+  # Network
+  network:
+    # WiFi/5G hotspot
+    stream_host: "0.0.0.0"
+    stream_port: 5000
+    
+    # Video streaming
+    enable_streaming: true
+    stream_protocol: "rtsp"  # rtsp, http, websocket
+    
+    # Ground station connection
+    ground_station_ip: "192.168.1.100"
+    ground_station_port: 14550
+  
+  # Data Logging
+  logging:
+    enabled: true
+    log_dir: "logs"
+    log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+    
+    # What to log
+    log_telemetry: true
+    log_gps: true
+    log_video: true
+    log_images: false  # Save detected objects as images
+    
+    # Rotation
+    max_log_size_mb: 100
+    max_log_files: 10
+  
+  # GPS
+  gps:
+    enabled: true
+    port: "/dev/ttyACM0"  # GPS module
+    baudrate: 9600
+    
+  # AI Processing
+  ai:
+    enabled: true
+    priority: "low"  # low, normal, high
+    
+  # Safety
+  safety:
+    battery_low_threshold: 20  # percent
+    temperature_high_threshold: 80  # Celsius
+    auto_landing_battery: 15  # percent
+    
+  # Startup
+  auto_start:
+    camera: true
+    ai: true
+    streaming: true
+    logging: true

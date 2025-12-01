@@ -1,0 +1,113 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
+*.log
+*.csv.bak
+*.xlsx.bak
+hardware_integration/test_data/
+simulations/output/
+logs/
+
+# Raspberry Pi
+*.swp
+*.swo
+*~
+
+# Firmware build
+firmware/**/*.bin
+firmware/**/*.hex
+firmware/**/*.elf
+firmware/**/build/
+firmware/**/.pio/
+
+# Data files
+*.mp4
+*.avi
+*.h264
+*.jpg
+*.png
+data_logs/
+flight_recordings/
+
+# Sensitive files - DO NOT COMMIT
+WLP pass.txt
+*pass*.txt
+*password*.txt
+*secret*.txt
+*key*.txt
+*credential*.txt
+*.key
+*.pem
+.env
+.env.local
+
+# Temporary and backup files
+*.bak
+*.tmp
+*.temp
+*~
+
+# Log files - should not be committed
+logs/
+companion_computer/logs/
+ground_station/logs/
+
+# System files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE and editor files
+.idea/
+*.swp
+*.swo
+
+# Large model files (should use git-lfs if needed)
+*.tflite
+*.h5
+*.pth
+*.pkl
+
+# Test and simulation output
+simulation/output/
+design_calculations/*.png
+design_calculations/*.json
+
