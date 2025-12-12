@@ -1,0 +1,99 @@
+# RC Mode Configuration
+# Mapping giữa RC channels và AI mission modes
+
+rc_mode:
+  # PWM thresholds for switch positions
+  pwm_thresholds:
+    low: 1300    # Switch DOWN position
+    middle: 1500 # Switch MIDDLE position  
+    high: 1700   # Switch UP position
+  
+  # Channel mapping - RadioMaster Pocket
+  channel_mapping:
+    aux1: 5  # SWA - Primary AI Mission Mode
+    aux2: 6  # SWB - AI Sub-mode / Functions
+    aux3: 7  # SWC - Detection Frequency
+    aux4: 8  # SWD - Emergency Override
+  
+  # AI Mission Modes configuration
+  mission_modes:
+    search_rescue:
+      name: "Search & Rescue"
+      description: "Ưu tiên tìm kiếm người và phương tiện cứu hộ"
+      detection_frequency: "high"
+      target_classes: ["person", "boat", "vehicle"]
+      confidence_threshold: 0.7
+      cpu_usage_limit: 0.7
+      battery_impact: "high"
+    
+    people_counting:
+      name: "People Counting" 
+      description: "Đếm số lượng người trong khu vực"
+      detection_frequency: "low"
+      target_classes: ["person"]
+      confidence_threshold: 0.6
+      cpu_usage_limit: 0.4
+      battery_impact: "low"
+    
+    vehicle_counting:
+      name: "Vehicle Counting"
+      description: "Đếm số lượng xe trong khu vực"
+      detection_frequency: "low" 
+      target_classes: ["car", "truck", "bus", "motorcycle"]
+      confidence_threshold: 0.6
+      cpu_usage_limit: 0.4
+      battery_impact: "low"
+    
+    reconnaissance:
+      name: "Reconnaissance"
+      description: "Trinh sát và thu thập dữ liệu tổng quát"
+      detection_frequency: "medium"
+      target_classes: ["person", "vehicle", "building"]
+      confidence_threshold: 0.5
+      cpu_usage_limit: 0.6
+      battery_impact: "medium"
+    
+    manual:
+      name: "Manual Mode"
+      description: "Tắt AI, điều khiển thủ công"
+      detection_frequency: "low"
+      target_classes: []
+      confidence_threshold: 0.0
+      cpu_usage_limit: 0.1
+      battery_impact: "low"
+  
+  # Detection frequency settings
+  detection_frequency:
+    high:
+      name: "High Frequency"
+      interval: 5    # Detect every 5 frames
+      description: "Phát hiện thường xuyên, độ trễ thấp"
+    
+    medium:
+      name: "Medium Frequency" 
+      interval: 15   # Detect every 15 frames
+      description: "Cân bằng giữa độ chính xác và hiệu suất"
+    
+    low:
+      name: "Low Frequency"
+      interval: 30   # Detect every 30 frames
+      description: "Tiết kiệm năng lượng, phát hiện ít thường xuyên"
+  
+  # Emergency settings
+  emergency:
+    override_channel: "aux4"
+    activation_threshold: 1700  # PWM value
+    auto_revert: true
+    revert_delay: 10  # seconds
+  
+  # Safety settings
+  safety:
+    max_mode_changes_per_minute: 10
+    critical_operation_timeout: 5  # seconds
+    battery_low_threshold: 0.3     # 30%
+    
+  # Ground station communication
+  ground_station:
+    send_mode_status: true
+    status_interval: 5  # seconds
+    include_performance: true

@@ -1,0 +1,60 @@
+# Cấu hình Quantum Filtering
+# Variational Quantum Circuit based Kalman Filter cho lọc nhiễu cảm biến MEMS
+
+# Mục tiêu: Kiểm chứng khả năng lọc nhiễu phi tuyến tính của mạng lượng tử
+# trên phần cứng cổ điển (Raspberry Pi) cho cảm biến MEMS giá rẻ
+
+quantum:
+  # Enable/disable quantum filtering
+  enabled: true
+  
+  # Operation mode
+  shadow_mode: true  # Run alongside standard EKF for comparison
+  
+  # Processing parameters
+  processing_interval: 0.1  # seconds between processing cycles
+  max_buffer_size: 100     # maximum data points to buffer
+  
+  # Quantum circuit parameters
+  num_qubits: 4
+  quantum_layers: 3
+  max_iterations: 50
+  convergence_threshold: 1e-4
+  
+  # Noise parameters (tuned for cheap MEMS sensors)
+  process_noise: 0.01
+  measurement_noise: 0.1
+  
+  # Logging and monitoring
+  log_comparisons: true
+  performance_report_interval: 60  # seconds between performance reports
+  
+  # Data collection for research
+  save_comparison_data: true
+  data_save_path: "quantum_comparison_data/"
+  
+  # Fallback behavior
+  fallback_to_classical: true  # Use classical Kalman if quantum fails
+  
+  # Resource management
+  max_processing_time: 0.5  # maximum seconds per quantum update
+  
+  # Sensor selection for filtering
+  filtered_sensors:
+    - accel_x
+    - accel_y
+    - accel_z
+    - gyro_z  # Most important for flying wing stability
+
+# EKF comparison parameters
+ekf_comparison:
+  state_dimension: 4
+  confidence_threshold: 0.7
+  significant_difference_threshold: 0.1
+
+# Performance monitoring
+performance:
+  track_processing_times: true
+  track_state_differences: true
+  track_confidence_scores: true
+  generate_reports: true
